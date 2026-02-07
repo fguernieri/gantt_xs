@@ -1,0 +1,14 @@
+﻿<?xml version="1.0"?>
+<info>
+  <id>gantt_xs</id>
+  <name>Gantt XS</name>
+  <description>Gantt interativo integrado ao Deck.</description>
+  <summary>Gantt interativo integrado ao Deck.</summary>
+  <version>0.1.0</version>
+  <category>office</category>
+  <author>Gantt XS</author>
+  <namespace>GanttXS</namespace>
+  <dependencies>
+    <nextcloud min-version="31" max-version="32" />
+  </dependencies>
+</info>

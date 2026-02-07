@@ -1,0 +1,11 @@
+{
+  "src/main.js": {
+    "file": "assets/main-CeACBRjC.js",
+    "name": "main",
+    "src": "src/main.js",
+    "isEntry": true,
+    "css": [
+      "assets/main-D380ufas.css"
+    ]
+  }
+}
