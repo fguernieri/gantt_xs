@@ -2,19 +2,29 @@
   <div class="app">
     <header ref="headerRef" class="app__header">
       <div>
-        <h1>Gantt + Deck (Teste)</h1>
-        <p>Arraste, redimensione e sincronize com o mock do Deck.</p>
+        <h1>Gantt + Deck</h1>
+        <p v-if="error" class="app__error">{{ error }}</p>
+        <p v-else>Arraste, redimensione e sincronize com o Deck em tempo real.</p>
       </div>
       <div class="app__config">
         <label>
-          Board ID
-          <input v-model="boardId" type="number" min="1" placeholder="Ex: 1">
+          Deck
+          <select v-model="boardId" @change="loadStacks" :disabled="loading">
+            <option :value="null" disabled>Carregando...</option>
+            <option v-for="board in boards" :key="board.id" :value="board.id">
+              {{ board.title }}
+            </option>
+          </select>
         </label>
-        <label>
-          Stack ID
-          <input v-model="stackId" type="number" min="1" placeholder="Ex: 1">
+        <label v-if="stacks.length">
+          Stack
+          <select v-model="stackId" @change="loadCards" :disabled="loading">
+            <option :value="null" disabled>Selecionar...</option>
+            <option v-for="stack in stacks" :key="stack.id" :value="stack.id">
+              {{ stack.title }}
+            </option>
+          </select>
         </label>
-        <button type="button" @click="loadCards">Carregar</button>
       </div>
     </header>
 
@@ -190,8 +200,12 @@ export default {
   name: 'App',
   components: { GanttModal },
   setup() {
-    const boardId = ref('1')
-    const stackId = ref('1')
+    const boardId = ref(null)
+    const stackId = ref(null)
+    const boards = ref([])
+    const stacks = ref([])
+    const loading = ref(false)
+    const error = ref('')
     const headerRef = ref(null)
     const settingsRef = ref(null)
     const ganttContainer = ref(null)
@@ -510,6 +524,45 @@ export default {
       await initGantt(addRangePadding(taskList.value))
     }
 
+    const loadBoards = async () => {
+      try {
+        loading.value = true
+        error.value = ''
+        const data = await deckClient.getStacks()
+        boards.value = Array.isArray(data) ? data : []
+        
+        // Auto-select first board and its first stack
+        if (boards.value.length > 0) {
+          boardId.value = boards.value[0].id
+          await loadStacks()
+        }
+      } catch (err) {
+        error.value = 'Erro ao carregar decks: ' + err.message
+        console.error('Failed to load boards:', err)
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const loadStacks = async () => {
+      if (!boardId.value) return
+      try {
+        loading.value = true
+        const data = await deckClient.getStacksForBoard(boardId.value)
+        stacks.value = Array.isArray(data) ? data : []
+        
+        if (stacks.value.length > 0 && !stackId.value) {
+          stackId.value = stacks.value[0].id
+          await loadCards()
+        }
+      } catch (err) {
+        console.warn('Could not load stacks:', err)
+        error.value = 'Erro ao carregar stacks: ' + err.message
+      } finally {
+        loading.value = false
+      }
+    }
+
     const persistCard = async (taskId, metadata, dueDate) => {
       const card = cardsById.value[taskId]
       if (!card) return
@@ -673,7 +726,7 @@ export default {
     )
 
     loadSettings()
-    loadCards()
+    loadBoards()
 
     onMounted(() => {
       window.addEventListener('resize', onResize)
@@ -686,6 +739,10 @@ export default {
     return {
       boardId,
       stackId,
+      boards,
+      stacks,
+      loading,
+      error,
       headerRef,
       settingsRef,
       ganttContainer,
@@ -698,6 +755,7 @@ export default {
       settingsOpen,
       settings,
       loadCards,
+      loadStacks,
       closeModal,
       saveModal,
       deleteTask,
@@ -751,6 +809,11 @@ export default {
   opacity: 0.7;
 }
 
+.app__error {
+  color: #e74c3c !important;
+  opacity: 1 !important;
+}
+
 .app__config {
   display: flex;
   gap: 12px;
@@ -765,19 +828,17 @@ export default {
   gap: 6px;
 }
 
-.app__config input {
+.app__config input,
+.app__config select {
   padding: 6px 8px;
   border-radius: 6px;
   border: 1px solid #d1d1d1;
+  font-size: 14px;
 }
 
-.app__config button {
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: none;
-  background: var(--color-primary);
-  color: #fff;
-  cursor: pointer;
+.app__config select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .settings {

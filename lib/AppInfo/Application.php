@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace OCA\GanttXS\AppInfo;
 
@@ -8,6 +8,7 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\INavigationManager;
 use OCP\IURLGenerator;
+use OCA\GanttXS\Middleware\CSPMiddleware;
 
 class Application extends App implements IBootstrap {
   public const APP_ID = 'gantt_xs';
@@ -17,6 +18,7 @@ class Application extends App implements IBootstrap {
   }
 
   public function register(IRegistrationContext $context): void {
+    $context->registerMiddleware(CSPMiddleware::class);
   }
 
   public function boot(IBootContext $context): void {
@@ -31,3 +33,5 @@ class Application extends App implements IBootstrap {
     });
   }
 }
+
+

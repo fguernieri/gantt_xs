@@ -1,5 +1,4 @@
-﻿<?php
-
+<?php
 namespace OCA\GanttXS\Controller;
 
 use OCP\AppFramework\Controller;
@@ -11,7 +10,11 @@ class PageController extends Controller {
     parent::__construct($appName, $request);
   }
 
+  /**
+   * @NoAdminRequired
+   * @NoCSRFRequired
+   */
   public function index(): TemplateResponse {
-    return new TemplateResponse($this->appName, 'index');
+    return new TemplateResponse($this->appName, "index");
   }
 }
