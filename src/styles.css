@@ -1,0 +1,13 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f5f6fb;
+}
+
+.gantt .popup-wrapper,
+.gantt .popup-wrapper .popup {
+  pointer-events: none;
+}
